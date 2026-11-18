@@ -5,13 +5,15 @@ Sell VIP, kits, items and in-game currency on your Rust server for crypto. A pla
 groups, permissions, items or console commands. The money goes straight to your wallets, with fees
 as low as 0.3%.
 
+![The store window that /donate opens](docs/images/store.jpg)
+
 ## Requirements
 
 One file, `CoinsPay.cs`, for both frameworks.
 
 | | Tested on |
 |---|---|
-| Oxide (uMod) | 2.0.7900 |
+| Oxide (uMod) | 2.0.7900, 2.0.7909 |
 | Carbon | 2.0.264 |
 | Rust | November 2026 update (protocol 2636) |
 
@@ -46,6 +48,12 @@ test invoice has a "Pay" button, no coins move, and the plugin delivers the item
    language.
 4. Within seconds of the payment the plugin delivers the item and closes the payment window.
    Items for the inventory wait until the player is in the game, awake and alive.
+
+![The payment window: QR code, short address and price](docs/images/payment-window.jpg)
+
+![The CoinsPay payment page on a phone: pick a coin, then scan the QR code](docs/images/payment-page.jpg)
+
+![Seconds after the payment: the message in chat and the delivered items](docs/images/delivered.jpg)
 
 The plugin asks the CoinsPay API about payments every few seconds, so the server needs no public
 address or webhook.

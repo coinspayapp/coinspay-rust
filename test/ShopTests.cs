@@ -74,7 +74,7 @@ namespace CoinsPayRust.Tests
             Assert.Equal("Bearer cpk_test_0123456789", create.Headers["Authorization"]);
             Assert.StartsWith("CoinsPay-Rust/0.1.0 (Fake 1.0)", create.Headers["User-Agent"]);
 
-            Assert.True(bob.Saw("Your invoice for 2 USD for Coins is ready"));
+            Assert.True(bob.Saw("Your invoice for 2.00 USD for Coins is ready"));
             Assert.True(bob.Saw("coinspay.app/pay/k7m2-x9pq-0001"));
             Assert.True(bob.Saw("F1 console"));
             Assert.True(bob.Saw("Test mode"));
@@ -144,7 +144,7 @@ namespace CoinsPayRust.Tests
             host.Api.PayPart(id, "1.5", "0.5");
             Tick(130000);
             Tick(70000);
-            Assert.Single(bob.Chat, c => c.Contains("Received 1.5 of 2 USD. Pay the remaining 0.5 USD"));
+            Assert.Single(bob.Chat, c => c.Contains("Received 1.50 of 2.00 USD. Pay the remaining 0.50 USD"));
             Assert.Empty(host.Commands);
         }
 
@@ -328,13 +328,13 @@ namespace CoinsPayRust.Tests
             const string gone = "76561198000000099";
             shop.Admin(admin, "give", new[] { gone, "coins" });
             host.Run();
-            Assert.True(admin.Saw("Invoice T-1 for Gone, Coins, 2 USD: https://coinspay.app/pay/k7m2-x9pq-0001"));
+            Assert.True(admin.Saw("Invoice T-1 for Gone, Coins, 2.00 USD: https://coinspay.app/pay/k7m2-x9pq-0001"));
             Assert.Equal("Gone", shop.Store.Order("inv_1").PlayerName);
 
             shop.Admin(admin, "give", new[] { "Bob", "coins" });
             host.Run();
             Assert.True(admin.Saw("An invoice for Coins was sent to Bob."));
-            Assert.True(bob.Saw("Your invoice for 2 USD"));
+            Assert.True(bob.Saw("Your invoice for 2.00 USD"));
 
             shop.Admin(admin, "give", new[] { "Nobody", "coins" });
             Assert.True(admin.Saw("Player Nobody is not on the server"));

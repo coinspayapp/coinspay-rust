@@ -196,7 +196,7 @@ namespace CoinsPayRust
             foreach (PackageDef p in settings.Packages)
             {
                 string duration = p.DurationMs > 0 ? Text.Fill(Msg(lang, "ChatFor"), Text.Vars("duration", Text.Duration(p.DurationMs, lang == "ru"))) : "";
-                lines.Append('\n').Append(Text.Fill(Msg(lang, "ChatLine"), Text.Vars("id", p.Id, "name", p.Name, "price", Text.Amount(p.Price), "currency", p.Currency, "duration", duration)));
+                lines.Append('\n').Append(Text.Fill(Msg(lang, "ChatLine"), Text.Vars("id", p.Id, "name", p.Name, "price", Text.Money(p.Price), "currency", p.Currency, "duration", duration)));
             }
             player.Reply(lines.ToString());
         }
@@ -309,7 +309,7 @@ namespace CoinsPayRust
                 if (online != null) ShowPayment(online, o);
                 if (also != null)
                 {
-                    var v = Text.Vars("id", o.Label, "name", o.PackageName, "player", o.PlayerName, "price", o.Price, "currency", o.Currency, "url", o.PayUrl);
+                    var v = Text.Vars("id", o.Label, "name", o.PackageName, "player", o.PlayerName, "price", Text.Money(o.Price), "currency", o.Currency, "url", o.PayUrl);
                     Say(also, online != null ? "AdminGave" : "AdminGaveLink", v);
                 }
             });
@@ -319,7 +319,7 @@ namespace CoinsPayRust
         {
             string lang = Lang(player.Id);
             string url = Text.WithLang(o.PayUrl, lang);
-            var v = Text.Vars("name", o.PackageName, "price", o.Price, "currency", o.Currency, "url", url,
+            var v = Text.Vars("name", o.PackageName, "price", Text.Money(o.Price), "currency", o.Currency, "url", url,
                 "short", Text.ShortUrl(o.PayUrl), "minutes", settings.LifetimeMinutes.ToString(CultureInfo.InvariantCulture));
             Say(player, "Created", v);
             player.Reply(Text.Fill(Msg(lang, "ShortLink"), v));
@@ -442,8 +442,8 @@ namespace CoinsPayRust
         {
             Decision d = Decision.Decide(o, i, host.Ready(o.PlayerId));
             ISender player = host.Player(o.PlayerId);
-            var v = Text.Vars("name", o.PackageName, "amount", Text.Amount(i.Amount), "paid", Text.Amount(i.AmountPaid),
-                "due", Text.Amount(i.AmountDue), "currency", i.Currency ?? o.Currency);
+            var v = Text.Vars("name", o.PackageName, "amount", Text.Money(i.Amount), "paid", Text.Money(i.AmountPaid),
+                "due", Text.Money(i.AmountDue), "currency", i.Currency ?? o.Currency);
             switch (d.Action)
             {
                 case DecisionAction.Deliver:

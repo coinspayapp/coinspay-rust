@@ -21,7 +21,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("CoinsPay", "CoinsPay", "0.1.0")]
+    [Info("CoinsPay", "CoinsPay", "0.1.1")]
     [Description("Sell VIP, kits and items for crypto: USDT, BTC, ETH and more, paid straight to your wallets")]
     public class CoinsPay : RustPlugin
     {

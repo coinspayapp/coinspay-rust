@@ -43,6 +43,7 @@ namespace CoinsPayRust
         public const string PayRoot = "CoinsPay.Pay";
         public const string Command = "coinspay.ui";
         public const int PageSize = 5;
+        private const int MenuHalfWidth = 330;
 
         private const string Dim = "0 0 0 0.6";
         private const string Window = "0.08 0.09 0.1 0.98";
@@ -66,7 +67,7 @@ namespace CoinsPayRust
             int pages = Pages(packages.Count);
             page = Math.Max(0, Math.Min(page, pages - 1));
             var ui = new List<UiElement>();
-            string window = Root(ui, MenuRoot, 330, 235);
+            string window = Root(ui, MenuRoot, MenuHalfWidth, 235);
 
             ui.Add(TextAt(window, MenuRoot + ".title", t("MenuTitle", null), 24, -60, 400, -16, 22, true, TextMain, "MiddleLeft"));
             ui.Add(TextAt(window, MenuRoot + ".subtitle", t("MenuSubtitle", null), 24, -84, 520, -60, 12, false, TextDim, "MiddleLeft"));
@@ -93,10 +94,14 @@ namespace CoinsPayRust
                     OffsetMax = Px(-16, top),
                     Color = Row,
                 });
-                ui.Add(TextIn(row, row + ".name", p.Name, 14, -30, 340, -6, 15, true, TextMain, "MiddleLeft"));
+                // The name and the price take the upper half of the row when a second line goes under
+                // them, and the middle of the row when nothing does.
                 string description = p.Description.Count > 0 ? p.Description[0] : "";
-                if (description.Length > 0) ui.Add(TextIn(row, row + ".desc", description, 14, -52, 340, -30, 11, false, TextDim, "MiddleLeft"));
-                ui.Add(TextIn(row, row + ".price", Text.Amount(p.Price) + " " + p.Currency, 340, -30, 498, -6, 15, true, Accent, "MiddleRight"));
+                bool nameAlone = description.Length == 0;
+                bool priceAlone = nameAlone && p.DurationMs <= 0;
+                ui.Add(TextIn(row, row + ".name", p.Name, 14, nameAlone ? -50 : -30, 340, -6, 15, true, TextMain, "MiddleLeft"));
+                if (!nameAlone) ui.Add(TextIn(row, row + ".desc", description, 14, -52, 340, -30, 11, false, TextDim, "MiddleLeft"));
+                ui.Add(TextIn(row, row + ".price", Text.Money(p.Price) + " " + p.Currency, 340, priceAlone ? -50 : -30, 498, -6, 15, true, Accent, "MiddleRight"));
                 if (p.DurationMs > 0)
                 {
                     string duration = t("MenuFor", Text.Vars("duration", Text.Duration(p.DurationMs, russian)));
@@ -123,10 +128,12 @@ namespace CoinsPayRust
 
             if (pages > 1)
             {
-                if (page > 0) ui.Add(ButtonAt(window, MenuRoot + ".prev", "<", 24, 16, 64, 48, Command + " page " + (page - 1).ToString(CultureInfo.InvariantCulture), Grey, bottom: true));
+                // "< 1 / 2 >" in the middle of the window; a missing arrow keeps its place empty.
+                const int mid = MenuHalfWidth;
+                if (page > 0) ui.Add(ButtonAt(window, MenuRoot + ".prev", "<", mid - 88, 16, mid - 48, 48, Command + " page " + (page - 1).ToString(CultureInfo.InvariantCulture), Grey, bottom: true));
                 ui.Add(TextAt(window, MenuRoot + ".page", t("MenuPage", Text.Vars("page", (page + 1).ToString(CultureInfo.InvariantCulture), "pages", pages.ToString(CultureInfo.InvariantCulture))),
-                    72, 16, 152, 48, 13, false, TextDim, "MiddleCenter", bottom: true));
-                if (page < pages - 1) ui.Add(ButtonAt(window, MenuRoot + ".next", ">", 160, 16, 200, 48, Command + " page " + (page + 1).ToString(CultureInfo.InvariantCulture), Grey, bottom: true));
+                    mid - 40, 16, mid + 40, 48, 13, false, TextDim, "MiddleCenter", bottom: true));
+                if (page < pages - 1) ui.Add(ButtonAt(window, MenuRoot + ".next", ">", mid + 48, 16, mid + 88, 48, Command + " page " + (page + 1).ToString(CultureInfo.InvariantCulture), Grey, bottom: true));
             }
             return ui;
         }
@@ -139,13 +146,14 @@ namespace CoinsPayRust
         {
             var ui = new List<UiElement>();
             string window = Root(ui, PayRoot, 330, 210);
-            var v = Text.Vars("name", order.PackageName, "price", order.Price, "currency", order.Currency, "minutes", minutes.ToString(CultureInfo.InvariantCulture));
+            string price = Text.Money(order.Price);
+            var v = Text.Vars("name", order.PackageName, "price", price, "currency", order.Currency, "minutes", minutes.ToString(CultureInfo.InvariantCulture));
 
             AddQr(ui, window, Qr.Encode(link), 24, 52, 264);
             ui.Add(TextAt(window, PayRoot + ".scan", t("PayScan", null), 24, 20, 288, 48, 12, false, TextDim, "MiddleCenter", bottom: true));
 
             ui.Add(TextAt(window, PayRoot + ".title", t("PayTitle", v), 312, -64, 636, -16, 18, true, TextMain, "MiddleLeft"));
-            ui.Add(TextAt(window, PayRoot + ".price", order.Price + " " + order.Currency, 312, -104, 636, -64, 26, true, Accent, "MiddleLeft"));
+            ui.Add(TextAt(window, PayRoot + ".price", price + " " + order.Currency, 312, -104, 636, -64, 26, true, Accent, "MiddleLeft"));
             ui.Add(TextAt(window, PayRoot + ".open", t("PayOpen", null), 312, -136, 636, -112, 12, false, TextDim, "MiddleLeft"));
             ui.Add(new UiElement
             {

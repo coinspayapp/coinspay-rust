@@ -78,6 +78,16 @@ namespace CoinsPayRust
             return s == "-0" ? "0" : s;
         }
 
+        /// <summary>A price shown to players, at least two decimals: 1.5 becomes "1.50", 5 becomes "5.00", 0.00012 stays.</summary>
+        public static string Money(decimal value)
+        {
+            string s = value.ToString("0.00##########################", CultureInfo.InvariantCulture);
+            return s == "-0.00" ? "0.00" : s;
+        }
+
+        /// <summary>A stored amount ("1.5") shown to players ("1.50").</summary>
+        public static string Money(string amount) => Money(ParseAmount(amount));
+
         /// <summary>A decimal in invariant format; 0 for anything else.</summary>
         public static decimal ParseAmount(string s)
         {

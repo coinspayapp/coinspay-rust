@@ -42,6 +42,11 @@ namespace CoinsPayRust.Tests
             Assert.Equal("0.00012", Text.Amount(0.00012m));
             Assert.Equal(4.99m, Text.ParseAmount("4.99"));
             Assert.Equal(0m, Text.ParseAmount("4,99"));
+            Assert.Equal("1.50", Text.Money(1.5m));
+            Assert.Equal("5.00", Text.Money(5m));
+            Assert.Equal("4.99", Text.Money(4.990m));
+            Assert.Equal("0.00012", Text.Money(0.00012m));
+            Assert.Equal("1.50", Text.Money("1.5"));
         }
 
         [Fact]

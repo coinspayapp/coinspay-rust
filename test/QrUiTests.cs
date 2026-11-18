@@ -127,12 +127,42 @@ namespace CoinsPayRust.Tests
             Assert.DoesNotContain(first, e => e.Command == "coinspay.ui page -1");
             Assert.Contains(first, e => e.Text == "1 / 2");
             Assert.Contains(first, e => e.Text == "for 7d");
-            Assert.Contains(first, e => e.Text == "3 USD");
+            Assert.Contains(first, e => e.Text == "3.00 USD");
 
             List<UiElement> second = Ui.Menu(T, Packages(7), 9, false);
             WellFormed(second, Ui.MenuRoot);
             Assert.Equal(new[] { "coinspay.ui buy p6", "coinspay.ui buy p7" }, second.Where(e => e.Command != null && e.Command.Contains(" buy ")).Select(e => e.Command));
             Assert.Contains(second, e => e.Command == "coinspay.ui page 0");
+
+            // "< 1 / 2 >" sits in the middle of the 660-pixel window on every page.
+            foreach (List<UiElement> ui in new[] { first, second })
+            {
+                UiElement counter = ui.Single(e => e.Name == Ui.MenuRoot + ".page");
+                Assert.Equal(660, QrTests.Ints(counter.OffsetMin)[0] + QrTests.Ints(counter.OffsetMax)[0]);
+            }
+            UiElement next = first.Single(e => e.Name == Ui.MenuRoot + ".next");
+            UiElement prev = second.Single(e => e.Name == Ui.MenuRoot + ".prev");
+            Assert.Equal(660, QrTests.Ints(prev.OffsetMin)[0] + QrTests.Ints(next.OffsetMax)[0]);
+        }
+
+        [Fact]
+        public void ANameWithoutASecondLineTakesTheMiddleOfTheRow()
+        {
+            List<PackageDef> packages = Packages(2);
+            packages[0].Description = new List<string>();
+            packages[1].Description = new List<string>();
+            List<UiElement> ui = Ui.Menu(T, packages, 0, false);
+            int Top(string name) => QrTests.Ints(ui.Single(e => e.Name == name).OffsetMin)[1];
+
+            // p1 has neither a description nor a duration: the name and the price are centred.
+            Assert.Equal(-50, Top(Ui.MenuRoot + ".row0.name"));
+            Assert.Equal(-50, Top(Ui.MenuRoot + ".row0.price"));
+            // p2 has a duration under the price: the name is centred, the price stays on top.
+            Assert.Equal(-50, Top(Ui.MenuRoot + ".row1.name"));
+            Assert.Equal(-30, Top(Ui.MenuRoot + ".row1.price"));
+            // With a description both stay in the upper half.
+            List<UiElement> withLines = Ui.Menu(T, Packages(1), 0, false);
+            Assert.Equal(-30, QrTests.Ints(withLines.Single(e => e.Name == Ui.MenuRoot + ".row0.name").OffsetMin)[1]);
         }
 
         [Fact]
